@@ -44,15 +44,18 @@ qlua test/test.lua
 ```
 
 ### Usage
-This package transfer data augmentation into two sub-problems: 1. lookup table remapping, 2. affine transformation. 
+This package transfers data augmentation into two sub-problems: 1. lookup table remapping, 2. affine transformation. 
 - **Remap**
 	0. dst = hzproc.Remap.Fast(src, table)
-	1. dst = hzproc.Remap.Affine(src, mat)
+	0. dst = hzproc.Remap.Affine(src, mat)
 - **Get Lookup Table**
 	0. res = hzproc.Table.Resize(inw, inh, ow, oh)
-	1. res = hzproc.Table.Pad(inw, inh, ow, oh)
-	2. res = hzproc.Table.Crop(inw, inh, ow, oh, xoff, yoff)
+	0. res = hzproc.Table.Pad(inw, inh, ow, oh)
+	0. res = hzproc.Table.Crop(inw, inh, ow, oh, xoff, yoff)
 - **Get Affine Matrix**
 (Detail about Affine Transformation, please see [Matlab Tutorial](http://www.mathworks.com/discovery/affine-transformation.html))
 	0. res = hzproc.Affine.Scale(sx, sy)
+	0. res = hzproc.Affine.Shift(tx, ty)
+	0. res = hzproc.Affine.Rotate(theta)
+	0. res = hzproc.Affine.Shear(kx, ky)
 
