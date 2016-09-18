@@ -17,24 +17,36 @@
 #define TH_GENERIC_FILE "generic/hzproc.c"
 #else
 
-/* functions declearations */
-// TODO cropping & padding
-static int hzproc_(Main_scaletable)(lua_State *L);
+/* hzlookuptable.c */
+static int hzproc_(Main_resizetable)(lua_State *L);
+static int hzproc_(Main_padtable)(lua_State *L);
+static int hzproc_(Main_croptable)(lua_State *L);
+/* hzmap.c TODO biliear mapping */
 static int hzproc_(Main_mapping)(lua_State *L);
-// TODO affine to lookuptable
 static int hzproc_(Main_affinemapping)(lua_State *L);
 // TODO 
 static int hzproc_(Main_combinetable)(lua_State *L);
+// TODO support Radial distortion augmentation
 
 /* register the functions */
-static const struct luaL_Reg hzproc_(Main__) [] = 
+static const struct luaL_Reg hzproc_(Remap) [] = 
 {
-	{"GetResizeTable", hzproc_(Main_scaletable)},
-	{"Remap", hzproc_(Main_mapping)},
-	{"AffineMap", hzproc_(Main_affinemapping)},
+	/* hzmap.c */
+	{"Fast", hzproc_(Main_mapping)},
+	{"Affine", hzproc_(Main_affinemapping)},
+	/* end */
 	{NULL, NULL}
 };
 
+static const struct luaL_Reg hzproc_(Table) [] = 
+{
+	/* hzlookuptable.c */
+	{"Resize", hzproc_(Main_resizetable)},
+	{"Pad", hzproc_(Main_padtable)},
+  {"Crop", hzproc_(Main_croptable)},
+	/* end */
+	{NULL, NULL}
+};
 /* load the implementation detail */
 #include "generic/hzlookuptable.c"
 #include "generic/hzmap.c"

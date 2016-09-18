@@ -40,8 +40,15 @@ extern "C" {
 DLL_EXPORT int luaopen_libhzproc(lua_State *L) {
 	lua_newtable(L);
 	lua_pushvalue(L, -1);
-	luaT_setfuncs(L, hzproc_FloatMain__, 0);
 	lua_setglobal(L, "hzproc");
+	
+	lua_newtable(L);
+	luaT_setfuncs(L, hzproc_FloatRemap, 0);
+	lua_setfield(L, -2, "Remap");
+	
+	lua_newtable(L);
+	luaT_setfuncs(L, hzproc_FloatTable, 0);
+	lua_setfield(L, -2, "Table");
 	return 1;
 }
 

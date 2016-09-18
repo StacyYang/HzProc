@@ -15,5 +15,8 @@
 
 require 'torch'
 require 'cutorch'
-require 'libhzproc'
 
+local hzproc = require 'libhzproc'
+hzproc.Affine = require 'hzproc.affine'
+
+return hzproc

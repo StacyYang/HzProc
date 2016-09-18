@@ -1,6 +1,5 @@
 ##  HZPROC
-Created by [Hang Zhang](http://www.hangzh.com). (This is a preview
-version, more features are coming.)
+Created by [Hang Zhang](http://www.hangzh.com)
 
 HzProc is a torch data augmentation toolbox for deep learning.
 The name of "HzProc" means high speed image processing, where "Hz" (hertz) 
@@ -37,10 +36,23 @@ cd hzproc
 luarocks make hzproc-scm-1.rockspec
 ```
 
-### Get Started
+### Quick Test
 The test script relies on qlua and [image](https://github.com/torch/image) package to load and display
-the images.
+the images. This script is a good [usage example](https://github.com/zhanghang1989/hzproc/blob/master/test/test.lua) to get started. 
 ```bash
 qlua test/test.lua
 ```
+
+### Usage
+This package transfer data augmentation into two sub-problems: 1. lookup table remapping, 2. affine transformation. 
+- **Remap**
+	0. dst = hzproc.Remap.Fast(src, table)
+	1. dst = hzproc.Remap.Affine(src, mat)
+- **Get Lookup Table**
+	0. res = hzproc.Table.Resize(inw, inh, ow, oh)
+	1. res = hzproc.Table.Pad(inw, inh, ow, oh)
+	2. res = hzproc.Table.Crop(inw, inh, ow, oh, xoff, yoff)
+- **Get Affine Matrix**
+(Detail about Affine Transformation, please see [Matlab Tutorial](http://www.mathworks.com/discovery/affine-transformation.html))
+	0. res = hzproc.Affine.Scale(sx, sy)
 

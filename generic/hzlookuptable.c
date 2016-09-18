@@ -13,7 +13,7 @@
  *      derived from this software 
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-static int hzproc_(Main_scaletable)(lua_State *L)
+static int hzproc_(Main_resizetable)(lua_State *L)
 /*
  * Generating lookup table to scale the 
  */
@@ -52,4 +52,78 @@ static int hzproc_(Main_scaletable)(lua_State *L)
   return 1;
 }
 
+static int hzproc_(Main_padtable)(lua_State *L)
+/*
+ * Generating lookup table for padding
+ */
+{
+	/* Check number of inputs */
+  if(lua_gettop(L) != 4)
+    luaL_error(L, "HZPROC: GetPadTabel: Incorrect number of arguments.\n");
+	/* Get input variables */
+  long in_width 	= luaL_checknumber(L, 1);
+  long in_height 	= luaL_checknumber(L, 2);
+  long out_width  = luaL_checknumber(L, 3);
+  long out_height = luaL_checknumber(L, 4);
+	/* continous ptr */
+	real *tdata;
+  THTensor *tensor 	= THTensor_(newWithSize3d)(2, out_height, out_width);
+  tdata = THTensor_(data)(tensor);
+	/* Creating lookup table */
+	long i, j, oidx, cxin, cyin, cxo, cyo;
+	long chsz = out_height * out_width;
+	cxin = (in_width   - 1) / 2; 
+	cyin = (in_height  - 1) / 2; 
+	cxo  = (out_width  - 1) / 2; 
+	cyo  = (out_height - 1) / 2; 
+	/* centering and recentering */
+	for (j=0; j<out_height; j++) {
+		for(i=0; i<out_width; i++) {
+			oidx = j*out_width + i;
+			*(tdata + oidx) = i-cxo + cxin;
+			*(tdata + chsz + oidx) = j-cyo + cyin;
+		}
+	}
+	/* return the tensor */
+	lua_pop(L, lua_gettop(L));
+	luaT_pushudata(L, (void*)tensor, torch_Tensor);
+	/* C function return number of the outputs */
+  return 1;
+}
 
+static int hzproc_(Main_croptable)(lua_State *L)
+/*
+ * Generating lookup table for croping
+ */
+{
+	/* Check number of inputs */
+  if(lua_gettop(L) != 6)
+    luaL_error(L, "HZPROC: GetCropTabel: Incorrect number of arguments.\n");
+	/* Get input variables */
+  long in_width 	= luaL_checknumber(L, 1);
+  long in_height 	= luaL_checknumber(L, 2);
+  long out_width  = luaL_checknumber(L, 3);
+  long out_height = luaL_checknumber(L, 4);
+  long x_offset   = luaL_checknumber(L, 5);
+  long y_offset   = luaL_checknumber(L, 6);
+	/* continous ptr */
+	real *tdata;
+  THTensor *tensor 	= THTensor_(newWithSize3d)(2, out_height, out_width);
+  tdata = THTensor_(data)(tensor);
+	/* Creating lookup table */
+	long i, j, oidx;
+	long chsz = out_height * out_width;
+	/* centering and recentering */
+	for (j=0; j<out_height; j++) {
+		for(i=0; i<out_width; i++) {
+			oidx = j*out_width + i;
+			*(tdata + oidx)        = i + x_offset;
+			*(tdata + chsz + oidx) = j + y_offset;
+		}
+	}
+	/* return the tensor */
+	lua_pop(L, lua_gettop(L));
+	luaT_pushudata(L, (void*)tensor, torch_Tensor);
+	/* C function return number of the outputs */
+  return 1;
+}
