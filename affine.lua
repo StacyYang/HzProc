@@ -17,17 +17,17 @@ local Affine = {}
 
 Affine.Scale = function(sx, sy)
 	local t = {}
-	t[1] = { sx, 0, 0}
-	t[2] = { 0, sy, 0}
-	t[3] = { 0, 0,  1}
+	t[1] = { sx, 0,  0}
+	t[2] = { 0 , sy, 0}
+	t[3] = { 0 , 0,  1}
 	return torch.CudaTensor(t)
 end
 
-Affine.Shift = function (tx,ty)
+Affine.Shift = function (tx, ty)
 	local t = {}
-	t[1] = { 1, 0, tx}
-	t[2] = { 0, 1, ty}
-	t[3] = { 0, 0,  1}
+	t[1] = { 1,  0,  0}
+	t[2] = { 0,  1,  0}
+	t[3] = { tx, ty, 1 }
 	return torch.CudaTensor(t)
 end
 
@@ -35,15 +35,15 @@ Affine.Rotate = function(theta)
 	local t = {}
 	t[1] = {math.cos(theta),-math.sin(theta), 0}
 	t[2] = {math.sin(theta), math.cos(theta), 0}
-	t[3] = {0,            0,                  1}
+	t[3] = {0,               0,               1}
 	return torch.CudaTensor(t)
 end
 
-Affine.Shear = function (kx,ky)
+Affine.Shear = function (shx, shy)
 	local t = setmetatable({},mt)
-	t[1] = { 1, kx, 0}
-	t[2] = { ky, 1, 0}
-	t[3] = { 0, 0,  1}
+	t[1] = { 1,   shx, 0}
+	t[2] = { shy, 1,   0}
+	t[3] = { 0,   0,   1}
 	return torch.CudaTensor(t)
 end
 

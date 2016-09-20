@@ -22,23 +22,23 @@ static int hzproc_(Main_mapping)(lua_State *L)
 	/* Check number of inputs */
   if(lua_gettop(L) != 2)
     luaL_error(L,  "HZPROC: Remap: Incorrect number of arguments.\n");
-	THCudaTensor* in_  = *(THCudaTensor**)luaL_checkudata(L, 1, 
+	THCTensor* in_  = *(THCTensor**)luaL_checkudata(L, 1, 
 												"torch.CudaTensor");
-	THCudaTensor* map_ = *(THCudaTensor**)luaL_checkudata(L, 2, 
+	THCTensor* map_ = *(THCTensor**)luaL_checkudata(L, 2, 
 												"torch.CudaTensor");
 	/* Check input dims */
 	THCState *state = cutorch_getstate(L);
-	if (THCudaTensor_nDimension(state, in_) != 3 ||
-			THCudaTensor_nDimension(state, map_) != 3)
+	if (THCTensor_(nDimension)(state, in_) != 3 ||
+			THCTensor_(nDimension)(state, map_) != 3)
 		luaL_error(L, "HZPROC: Mapping: incorrect input dims. \n");
 	/* Init output tensor */
 	long i;
 	long outsz[3];
 	outsz[0] = 3;
 	for (i=1; i<3; i++) {
-		outsz[i] = THCudaTensor_size(state, map_, i);
+		outsz[i] = THCTensor_(size)(state, map_, i);
 	}
-	THCudaTensor* out_ =  THCudaTensor_newWithSize3d(state, outsz[0], 
+	THCTensor* out_ =  THCTensor_(newWithSize3d)(state, outsz[0], 
 																								outsz[1], outsz[2]);
 	HZMapping(state, in_, out_, map_);
 	/* return the tensor */
@@ -57,21 +57,21 @@ static int hzproc_(Main_affinemapping)(lua_State *L)
 	/* Check number of inputs */
   if(lua_gettop(L) != 2)
     luaL_error(L,  "HZPROC: AffineMap: Incorrect number of arguments.\n");
-	THCudaTensor* in_  = *(THCudaTensor**)luaL_checkudata(L, 1, 
+	THCTensor* in_  = *(THCTensor**)luaL_checkudata(L, 1, 
 												"torch.CudaTensor");
-	THCudaTensor* matrix_ = *(THCudaTensor**)luaL_checkudata(L, 2, 
+	THCTensor* matrix_ = *(THCTensor**)luaL_checkudata(L, 2, 
 												"torch.CudaTensor");
 	/* Check input */
 	THCState *state = cutorch_getstate(L);
-	if (THCudaTensor_nDimension(state, in_) != 3 ||
-			THCudaTensor_nDimension(state, matrix_) != 2)
+	if (THCTensor_(nDimension)(state, in_) != 3 ||
+			THCTensor_(nDimension)(state, matrix_) != 2)
 		luaL_error(L, "HZPROC: AffineMap: incorrect input dims. \n");
-	if (THCudaTensor_size(state, matrix_, 0) != 3 ||
-			THCudaTensor_size(state, matrix_, 1) != 3 )
+	if (THCTensor_(size)(state, matrix_, 0) != 3 ||
+			THCTensor_(size)(state, matrix_, 1) != 3 )
 		luaL_error(L, "HZPROC: AffineMap: incorrect affine matrix size. \n");
 	/* Init output tensor */
-	THCudaTensor* out_ =  THCudaTensor_new(state);
-	THCudaTensor_resizeAs(state, out_, in_);
+	THCTensor* out_ =  THCTensor_(new)(state);
+	THCTensor_(resizeAs)(state, out_, in_);
 	HZAffineMap(state, in_, out_, matrix_);
 	/* return the tensor */
 	lua_pop(L, lua_gettop(L));

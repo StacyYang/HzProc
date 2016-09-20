@@ -13,15 +13,15 @@
  *      derived from this software 
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-#ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/hzproc.c"
+#ifndef THC_GENERIC_FILE
+#define THC_GENERIC_FILE "generic/hzproc.c"
 #else
 
 /* hzlookuptable.c */
 static int hzproc_(Main_resizetable)(lua_State *L);
 static int hzproc_(Main_padtable)(lua_State *L);
 static int hzproc_(Main_croptable)(lua_State *L);
-/* hzmap.c TODO biliear mapping */
+/* hzremap.c TODO biliear mapping */
 static int hzproc_(Main_mapping)(lua_State *L);
 static int hzproc_(Main_affinemapping)(lua_State *L);
 // TODO 
@@ -31,7 +31,7 @@ static int hzproc_(Main_combinetable)(lua_State *L);
 /* register the functions */
 static const struct luaL_Reg hzproc_(Remap) [] = 
 {
-	/* hzmap.c */
+	/* hzremap.c */
 	{"Fast", hzproc_(Main_mapping)},
 	{"Affine", hzproc_(Main_affinemapping)},
 	/* end */
@@ -49,6 +49,6 @@ static const struct luaL_Reg hzproc_(Table) [] =
 };
 /* load the implementation detail */
 #include "generic/hzlookuptable.c"
-#include "generic/hzmap.c"
+#include "generic/hzremap.c"
 
-#endif // TH_GENERIC_FILE
+#endif // THC_GENERIC_FILE

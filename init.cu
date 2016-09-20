@@ -26,16 +26,19 @@ extern "C" struct THCState* cutorch_getstate(lua_State* L);
 extern struct THCState* cutorch_getstate(lua_State* L);
 #endif
 
-#define torch_(NAME) TH_CONCAT_3(torch_, Real, NAME)
-#define torch_Tensor TH_CONCAT_STRING_3(torch., Real, Tensor)
-#define hzproc_(NAME) TH_CONCAT_3(hzproc_, Real, NAME)
+#define torch_(NAME)     TH_CONCAT_3(torch_, Real, NAME)
+#define torch_Tensor     TH_CONCAT_STRING_3(torch., Real, Tensor)
+#define hzproc_(NAME)    TH_CONCAT_3(hzproc_, Real, NAME)
+#define THCTensor        TH_CONCAT_3(TH,CReal,Tensor)
+#define THCTensor_(NAME) TH_CONCAT_4(TH,CReal,Tensor_,NAME)
+#define THC_Tensor TH_CONCAT_STRING_3(torch., CReal, Tensor)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "generic/hzproc.c"
-#include "THGenerateFloatTypes.h"
+#include "THCGenerateFloatType.h"
 
 DLL_EXPORT int luaopen_libhzproc(lua_State *L) {
 	lua_newtable(L);

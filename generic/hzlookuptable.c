@@ -27,9 +27,8 @@ static int hzproc_(Main_resizetable)(lua_State *L)
   long out_width  = luaL_checknumber(L, 3);
   long out_height = luaL_checknumber(L, 4);
 	/* continous ptr */
-	real *tdata;
-  THTensor *tensor 	= THTensor_(newWithSize3d)(2, out_height, out_width);
-  tdata = THTensor_(data)(tensor);
+	long size = 2*out_height*out_width;
+	real *tdata = (real*)THAlloc(sizeof(real)*size);
 	/* Creating lookup table */
 	long i, j, oidx;
 	long chsz = out_height * out_width;
@@ -45,9 +44,17 @@ static int hzproc_(Main_resizetable)(lua_State *L)
 			*(tdata + chsz + oidx) = scy * j;
 		}
 	}
+	/* Create the CudaTensor and copy the data */
+	THCState *state = cutorch_getstate(L);
+	THCTensor *tensor = THCTensor_(newWithSize3d)(state, 2, out_height, 
+																out_width);
+	real *ddata = THCTensor_(data)(state, tensor);
+	THCudaCheck(cudaMemcpy(ddata, tdata, size * sizeof(real), 
+							cudaMemcpyHostToDevice));
+	THFree(tdata); 
 	/* return the tensor */
 	lua_pop(L, lua_gettop(L));
-	luaT_pushudata(L, (void*)tensor, torch_Tensor);
+	luaT_pushudata(L, (void*)tensor, THC_Tensor);
 	/* C function return number of the outputs */
   return 1;
 }
@@ -66,9 +73,8 @@ static int hzproc_(Main_padtable)(lua_State *L)
   long out_width  = luaL_checknumber(L, 3);
   long out_height = luaL_checknumber(L, 4);
 	/* continous ptr */
-	real *tdata;
-  THTensor *tensor 	= THTensor_(newWithSize3d)(2, out_height, out_width);
-  tdata = THTensor_(data)(tensor);
+	long size = 2*out_height*out_width;
+	real *tdata = (real*)THAlloc(sizeof(real)*size);
 	/* Creating lookup table */
 	long i, j, oidx, cxin, cyin, cxo, cyo;
 	long chsz = out_height * out_width;
@@ -84,9 +90,17 @@ static int hzproc_(Main_padtable)(lua_State *L)
 			*(tdata + chsz + oidx) = j-cyo + cyin;
 		}
 	}
+	/* Create the CudaTensor and copy the data */
+	THCState *state = cutorch_getstate(L);
+	THCTensor *tensor = THCTensor_(newWithSize3d)(state, 2, out_height, 
+																out_width);
+	real *ddata = THCTensor_(data)(state, tensor);
+	THCudaCheck(cudaMemcpy(ddata, tdata, size * sizeof(real), 
+							cudaMemcpyHostToDevice));
+	THFree(tdata); 
 	/* return the tensor */
 	lua_pop(L, lua_gettop(L));
-	luaT_pushudata(L, (void*)tensor, torch_Tensor);
+	luaT_pushudata(L, (void*)tensor, THC_Tensor);
 	/* C function return number of the outputs */
   return 1;
 }
@@ -107,9 +121,8 @@ static int hzproc_(Main_croptable)(lua_State *L)
   long x_offset   = luaL_checknumber(L, 5);
   long y_offset   = luaL_checknumber(L, 6);
 	/* continous ptr */
-	real *tdata;
-  THTensor *tensor 	= THTensor_(newWithSize3d)(2, out_height, out_width);
-  tdata = THTensor_(data)(tensor);
+	long size = 2*out_height*out_width;
+	real *tdata = (real*)THAlloc(sizeof(real)*size);
 	/* Creating lookup table */
 	long i, j, oidx;
 	long chsz = out_height * out_width;
@@ -121,9 +134,17 @@ static int hzproc_(Main_croptable)(lua_State *L)
 			*(tdata + chsz + oidx) = j + y_offset;
 		}
 	}
+	/* Create the CudaTensor and copy the data */
+	THCState *state = cutorch_getstate(L);
+	THCTensor *tensor = THCTensor_(newWithSize3d)(state, 2, out_height, 
+																out_width);
+	real *ddata = THCTensor_(data)(state, tensor);
+	THCudaCheck(cudaMemcpy(ddata, tdata, size * sizeof(real), 
+							cudaMemcpyHostToDevice));
+	THFree(tdata); 
 	/* return the tensor */
 	lua_pop(L, lua_gettop(L));
-	luaT_pushudata(L, (void*)tensor, torch_Tensor);
+	luaT_pushudata(L, (void*)tensor, THC_Tensor);
 	/* C function return number of the outputs */
   return 1;
 }

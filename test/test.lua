@@ -15,6 +15,7 @@
 
 require "hzproc"
 require 'image'
+require 'math'
 
 -- load the image
 I = image.lena():cuda()
@@ -25,7 +26,6 @@ local function hzproc_testResize()
 	-- generating lookuptable for scaling
 	map = hzproc.Table.Resize(I:size()[3], I:size()[2], 
 							I:size()[3]*scale, I:size()[2]*scale)
-	map = map:cuda()
 	-- mapping
 	O = hzproc.Remap.Fast(I, map)
 	-- display the images
@@ -34,7 +34,10 @@ end
 
 local function hzproc_testAffine()
 	-- affine transformation matrix
-	mat = torch.CudaTensor({{1, 0, 0}, {.5, 1, 0}, {0, 0, 1}})
+	mat = hzproc.Affine.Shift(-0.1*I:size()[2], -0.1*I:size()[3])
+	mat = hzproc.Affine.Scale(1.2, 0.8)
+	mat = mat * hzproc.Affine.Rotate(-math.pi/8)
+	mat = mat * hzproc.Affine.Shear(-0.1, 0.2)
 	-- affine mapping
 	O = hzproc.Remap.Affine(I, mat);
 	-- display the images
@@ -46,7 +49,6 @@ local function hzproc_testPadding()
 	-- generating lookuptable for padding
 	map = hzproc.Table.Pad(I:size()[3], I:size()[2], 
 							I:size()[3]*scale, I:size()[2]*scale)
-	map = map:cuda()
 	-- mapping
 	O = hzproc.Remap.Fast(I, map)
 	-- display the images
@@ -60,7 +62,6 @@ local function hzproc_testCroping()
 	map = hzproc.Table.Crop(I:size()[3], I:size()[2], 
 							I:size()[3]*scale, I:size()[2]*scale, 
 							I:size()[3]*offset, I:size()[2]*offset)
-	map = map:cuda()
 	-- mapping
 	O = hzproc.Remap.Fast(I, map)
 	-- display the images
