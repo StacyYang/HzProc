@@ -35,7 +35,7 @@ end
 local function hzproc_testAffine()
 	-- affine transformation matrix
 	mat = hzproc.Affine.Shift(-0.1*I:size()[2], -0.1*I:size()[3])
-	mat = hzproc.Affine.Scale(1.2, 0.8)
+	mat = mat * hzproc.Affine.Scale(1.2, 0.8)
 	mat = mat * hzproc.Affine.Rotate(-math.pi/8)
 	mat = mat * hzproc.Affine.Shear(-0.1, 0.2)
 	-- affine mapping
