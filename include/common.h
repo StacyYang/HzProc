@@ -13,12 +13,6 @@
  *      derived from this software 
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-#ifndef __HZPROC_COMMON_H__
-#define __HZPROC_COMMON_H__
-
-#include "THCDeviceTensor.cuh"
-#include "THCDeviceTensorUtils.cuh"
-
 template <int Dim>
 THCDeviceTensor<float, Dim> devicetensor(THCState *state, THCudaTensor *t) {
   if (!t) {
@@ -45,7 +39,3 @@ THCDeviceTensor<float, Dim> devicetensor(THCState *state, THCudaTensor *t) {
   return THCDeviceTensor<float, Dim>(THCudaTensor_data(state, t), size);
 }
 
-#define HZPROC_assertSameGPU(...) THAssertMsg(THCudaTensor_checkGPU(__VA_ARGS__), \
-  "Some of weight/gradient/input tensors are located on different GPUs. Please move them to a single one.")
-
-#endif // __HZPROC_COMMON_H__

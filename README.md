@@ -1,12 +1,19 @@
-##  HZPROC
+#  HZPROC
 Created by [Hang Zhang](http://www.hangzh.com)
 
 HzProc is a torch data augmentation toolbox for deep learning.
 The name of "HzProc" means high speed image processing, where "Hz" (hertz) 
 is the unit of frequency and "Proc" is abbreviation of processing.
-HZ is also the initial of the author. 
+HZ is also the initial of the author. It contains the functions
+within the following subcategories:
 
-### Introduction
+- [Remap](./doc/index.md#remap) remap the images based on a lookup table;
+- [Affine Transformation](./doc/index.md#affine-transformation) affine transformation;
+- [Combine Transforms](./doc/index.md#combine-transforms) combining different augmentation approach;
+- [Get Lookup Table](./doc/index.md#get-lookup-table) getting lookup table;
+- [Get Affine Matrix](./doc/index.md#get-affine-matrix) getting affine matrix;
+
+## Introduction
 Deep learning is known as one of the most popular methods in Computer 
 Vision area today. 
 It has achieved superior result in many competitions such as ImageNet and 
@@ -26,7 +33,7 @@ online (taking constant time).
 HzProc is an open source toolbox, which has a highly optimized CUDA 
 backend. 
 
-### Install
+## Install
 This package relies on [torch7](https://github.com/torch/torch7) and 
 [cutorch](https://github.com/torch/cutorch). Please note the package
 also relies on a NVIDIA GPU compitable with CUDA 6.5 or higher version.
@@ -36,26 +43,10 @@ cd hzproc
 luarocks make hzproc-scm-1.rockspec
 ```
 
-### Quick Test
+## Quick Test
 The test script relies on qlua and [image](https://github.com/torch/image) package to load and display
 the images. This script is a good [usage example](https://github.com/zhanghang1989/hzproc/blob/master/test/test.lua) to get started. 
 ```bash
 qlua test/test.lua
 ```
-
-### Usage
-This package transfers data augmentation into two sub-problems: 1. lookup table remapping, 2. affine transformation. 
-- **Remap**
-	0. dst = hzproc.Remap.Fast(src, table)
-	0. dst = hzproc.Remap.Affine(src, mat)
-- **Get Lookup Table**
-	0. res = hzproc.Table.Resize(inw, inh, ow, oh)
-	0. res = hzproc.Table.Pad(inw, inh, ow, oh)
-	0. res = hzproc.Table.Crop(inw, inh, ow, oh, xoff, yoff)
-- **Get Affine Matrix**
-(Detail about Affine Transformation, please see [Matlab Tutorial](http://www.mathworks.com/discovery/affine-transformation.html))
-	0. res = hzproc.Affine.Scale(sx, sy)
-	0. res = hzproc.Affine.Shift(tx, ty)
-	0. res = hzproc.Affine.Rotate(theta)
-	0. res = hzproc.Affine.Shear(kx, ky)
 

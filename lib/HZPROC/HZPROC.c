@@ -13,25 +13,14 @@
  *      derived from this software 
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-#ifndef __HZPROC_H__
-#define __HZPROC_H__
+#ifndef THC_GENERIC_FILE
+#define THC_GENERIC_FILE "lib/HZPROC/HZPROC.c"
+#else
 
-#include <THC/THC.h>
-#include "common.h"
+#define HZPROC_assertSameGPU(...) THAssertMsg(THCTensor_(checkGPU)(__VA_ARGS__), \
+  "Some of weight/gradient/input tensors are located on different GPUs. Please move them to a single one.")
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "HZMapping.cu"
+#include "HZAffineMap.cu"
 
-/* HZMapping.cu */
-void HZMapping(THCState *state, THCudaTensor *input, THCudaTensor *output,
-							THCudaTensor *table);
-/* HZAffineMap.cu */
-void HZAffineMap(THCState *state, THCudaTensor *input, THCudaTensor *output,
-							THCudaTensor *matrix);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif //__HZPROC_H__
+#endif // THC_GENERIC_FILE

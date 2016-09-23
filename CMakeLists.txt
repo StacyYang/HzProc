@@ -28,13 +28,14 @@ CUDA_SELECT_NVCC_ARCH_FLAGS(NVCC_FLAGS_EXTRA $ENV{TORCH_CUDA_ARCH_LIST})
 LIST(APPEND CUDA_NVCC_FLAGS ${NVCC_FLAGS_EXTRA})
 
 INCLUDE_DIRECTORIES(
+	./include
 	${CMAKE_CURRENT_SOURCE_DIR} 
 	"${Torch_INSTALL_INCLUDE}/THC" 
 )
 LINK_DIRECTORIES("${Torch_INSTALL_LIB}")
 
 # ADD lua source files
-FILE(GLOB src *.c *.cu lib/HZPROC/*.cu) 
+FILE(GLOB src *.c *.cu) 
 FILE(GLOB luasrc *.lua) 
 SET(luasrc ${luasrc} test/test.lua) 
 

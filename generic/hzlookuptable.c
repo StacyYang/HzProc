@@ -26,12 +26,11 @@ static int hzproc_(Main_resizetable)(lua_State *L)
   long in_height 	= luaL_checknumber(L, 2);
   long out_width  = luaL_checknumber(L, 3);
   long out_height = luaL_checknumber(L, 4);
-	/* continous ptr */
-	long size = 2*out_height*out_width;
-	real *tdata = (real*)THAlloc(sizeof(real)*size);
 	/* Creating lookup table */
 	long i, j, oidx;
 	long chsz = out_height * out_width;
+	long size = 2 * chsz;
+	real *tdata = (real*)THAlloc(sizeof(real)*size);
 	real scx = 1.0 * in_width  / out_width;
 	real scy = 1.0 * in_height / out_height;
 

@@ -17,38 +17,60 @@
 #define THC_GENERIC_FILE "generic/hzproc.c"
 #else
 
-/* hzlookuptable.c */
-static int hzproc_(Main_resizetable)(lua_State *L);
-static int hzproc_(Main_padtable)(lua_State *L);
-static int hzproc_(Main_croptable)(lua_State *L);
-/* hzremap.c TODO biliear mapping */
-static int hzproc_(Main_mapping)(lua_State *L);
-static int hzproc_(Main_affinemapping)(lua_State *L);
-// TODO 
-static int hzproc_(Main_combinetable)(lua_State *L);
-// TODO support Radial distortion augmentation
+/* load the implementation detail */
+#include "generic/hzlookuptable.c"
+#include "generic/hzremap.c"
+#include "generic/hzcombine.c"
+
+// TODO support color and lighting jittering
+// TODO support bicubic mapping
+// TODO support radial distortion augmentation
 
 /* register the functions */
 static const struct luaL_Reg hzproc_(Remap) [] = 
 {
-	/* hzremap.c */
-	{"Fast", hzproc_(Main_mapping)},
-	{"Affine", hzproc_(Main_affinemapping)},
+	{"Fast",     hzproc_(Main_map_fast)},
+	{"Bilinear", hzproc_(Main_map_bili)},
+	{"Combine",  hzproc_(Main_combinetable)},
+	/* end */
+	{NULL, NULL}
+};
+
+static const struct luaL_Reg hzproc_(Transform) [] = 
+{
+	{"Fast",     hzproc_(Main_affine_fast)},
+	{"Bilinear", hzproc_(Main_affine_bili)},
+	{"ToTable",  hzproc_(Main_affine_2table)},
 	/* end */
 	{NULL, NULL}
 };
 
 static const struct luaL_Reg hzproc_(Table) [] = 
 {
-	/* hzlookuptable.c */
-	{"Resize", hzproc_(Main_resizetable)},
-	{"Pad", hzproc_(Main_padtable)},
-  {"Crop", hzproc_(Main_croptable)},
+	{"Resize",   hzproc_(Main_resizetable)},
+	{"Pad",      hzproc_(Main_padtable)},
+  {"Crop",     hzproc_(Main_croptable)},
 	/* end */
 	{NULL, NULL}
 };
-/* load the implementation detail */
-#include "generic/hzlookuptable.c"
-#include "generic/hzremap.c"
+
+DLL_EXPORT int luaopen_libhzproc(lua_State *L) {
+	lua_newtable(L);
+	lua_pushvalue(L, -1);
+	lua_setglobal(L, "hzproc");
+	
+	lua_newtable(L);
+	luaT_setfuncs(L, hzproc_(Remap), 0);
+	lua_setfield(L, -2, "Remap");
+	
+	lua_newtable(L);
+	luaT_setfuncs(L, hzproc_(Transform), 0);
+	lua_setfield(L, -2, "Transform");
+
+	lua_newtable(L);
+	luaT_setfuncs(L, hzproc_(Table), 0);
+	lua_setfield(L, -2, "Table");
+	return 1;
+}
 
 #endif // THC_GENERIC_FILE
