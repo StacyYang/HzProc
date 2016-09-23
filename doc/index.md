@@ -58,6 +58,7 @@ map = hzproc.Remap.Combine(map1, map2)
 
 ### Get Lookup Table
 ``inw, inh, ow, oh, xoff, yoff``abbreviation of input width, height and output width and height, x-axis and y-axis offset.
+
 0. **tab = hzproc.Table.Resize(inw, inh, ow, oh)**
 0. **tab = hzproc.Table.Pad(inw, inh, ow, oh)**
 0. **tab = hzproc.Table.Crop(inw, inh, ow, oh, xoff, yoff)**
