@@ -45,7 +45,7 @@ luarocks make hzproc-scm-1.rockspec
 
 ## Quick Test
 The test script relies on qlua and [image](https://github.com/torch/image) package to load and display
-the images. This script is a good [usage example](https://github.com/zhanghang1989/hzproc/blob/master/test/test.lua) to get started. 
+the images. This script is a good [usage example](https://github.com/zhanghang1989/hzproc/blob/master/test/test.lua) to get started. The documentations can be found in the [link](https://github.com/zhanghang1989/hzproc/blob/master/doc/index.md).
 ```bash
 qlua test/test.lua
 ```
