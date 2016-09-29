@@ -158,7 +158,7 @@ __global__ void HZCrop_Pad_kernel (
 	inheight = input.getSize(1);
 	/* main operation */
 	xi = xo + xb - pad;
-	yi = yo + xb - pad;
+	yi = yo + yb - pad;
 	/* boundary check for input*/
 	if(xi >= 0 && xi < inwidth && yi >=0 && yi < inheight)
 		output[ch][yo][xo] = input[ch][yi][xi].ldg();
