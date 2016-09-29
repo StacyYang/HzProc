@@ -53,7 +53,7 @@ static int hzproc_(Main_affine_2table)(lua_State *L)
 	THCTensor *out_ = THCTensor_(newWithSize3d)(state, 2, height, 
 																width);
 	/* Affine transform to grid */
-	HZAffineBili(state, in_, out_, matrix_);
+	HZAffineFast(state, in_, out_, matrix_);
 	/* Free the memory and tensor */
 	THFree(tdata); 
 	THCTensor_(free)(state, in_);

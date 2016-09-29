@@ -22,5 +22,7 @@
 
 #include "HZMapping.cu"
 #include "HZAffineMap.cu"
+#include "HZCropping.cu"
+#include "HZFlipping.cu"
 
 #endif // THC_GENERIC_FILE

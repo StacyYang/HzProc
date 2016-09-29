@@ -13,10 +13,10 @@
  *      derived from this software 
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-__global__ void HZMap_Fast_kernel (
+__global__ void HZCrop_Fast_kernel (
 	THCDeviceTensor<real, 3> input,
 	THCDeviceTensor<real, 3> output,
-	THCDeviceTensor<real, 3> table)
+	int xb, int yb, real sx, real sy)
 {
   /* declarations of the variables */
   int ch, xo, yo, xi, yi, inwidth, inheight;
@@ -29,8 +29,8 @@ __global__ void HZMap_Fast_kernel (
 	inwidth  = input.getSize(2);
 	inheight = input.getSize(1);
 	/* main operation */
-	xi = table[0][yo][xo] + 0.5;
-	yi = table[1][yo][xo] + 0.5;
+	xi = xb + sx*xo;
+	yi = yb + sy*yo;
 	/* boundary check for input*/
 	if(xi >= 0 && xi < inwidth && yi >=0 && yi < inheight)
 		output[ch][yo][xo] = input[ch][yi][xi].ldg();
@@ -38,31 +38,41 @@ __global__ void HZMap_Fast_kernel (
 		output[ch][yo][xo] = 0;
 }
 
-void HZMapFast(THCState *state, THCTensor *input_, THCTensor *output_,
-							THCTensor *table_)
+void HZCropFast(THCState *state, THCTensor *input_, THCTensor *output_,
+							int xi, int yi, int xo, int yo)
 /*
  * mapping the image pixels based on the lookuptable
  */
 {
+  /* declarations of the variables */
+	int inw, inh, ow, oh;
+	real sx, sy;
 	/* Check the GPU index */
-	HZPROC_assertSameGPU(state, 3, input_, output_, table_);
+	HZPROC_assertSameGPU(state, 2, input_, output_);
 	/* Device tensors */
 	THCDeviceTensor<real, 3> input  = devicetensor<3>(state, input_);
 	THCDeviceTensor<real, 3> output = devicetensor<3>(state, output_);
-	THCDeviceTensor<real, 3> table  = devicetensor<3>(state, table_);
+	/* scale params */
+	ow = input.getSize(2);
+	oh = input.getSize(1);
+	inw = xo - xi;
+	inh = yo - yi;
+	sx = 1.0 * ow / inw;
+	sy = 1.0 * oh / inh;
 	/* kernel function */
 	cudaStream_t stream = THCState_getCurrentStream(state);
 	dim3 threads(16, 16);
 	dim3 blocks(output.getSize(2)/16+1, output.getSize(1)/16+1, 
 							output.getSize(0));
-	HZMap_Fast_kernel<<<blocks, threads, 0, stream>>>(input, output, table);
+	HZCrop_Fast_kernel<<<blocks, threads, 0, stream>>>(input, output, 
+										xi, yi, sx, sy);
 	THCudaCheck(cudaGetLastError());
 }
 
-__global__ void HZMap_Bili_kernel (
+__global__ void HZCrop_Bili_kernel (
 	THCDeviceTensor<real, 3> input,
 	THCDeviceTensor<real, 3> output,
-	THCDeviceTensor<real, 3> table)
+	int xb, int yb, real sx, real sy)
 {
   /* declarations of the variables */
   int ch, xo, yo, inwidth, inheight;
@@ -77,15 +87,16 @@ __global__ void HZMap_Bili_kernel (
 	inwidth  = input.getSize(2);
 	inheight = input.getSize(1);
 	/* main operation */
-	xi = table[0][yo][xo];
-	yi = table[1][yo][xo];
+	xi = xb + sx*xo;
+	yi = yb + sy*yo;
 	x0 = (int)xi;
 	y0 = (int)yi;
 	/* boundary check for input*/
-	if(x0 >= 0 && x0 < inwidth-1 && y0 >= 0 && yi < inheight-1)
+	if(xi >= 0 && xi < inwidth && yi >=0 && yi < inheight)
 	{
-		wx = 1.0 - (xi - x0);
-		wy = 1.0 - (yi - y0);
+		// TODO FIXME there are bugs in crop bilinear kernel function
+		wx = 0.5;//1.0 - (xi - x0);
+		wy = 0.5;//1.0 - (yi - y0);
 		w00 = wx * wy;
 		w01 = (1-wx) * wy;
 		w10 = wx * (1-wy);
@@ -99,24 +110,80 @@ __global__ void HZMap_Bili_kernel (
 		output[ch][yo][xo] = 0;
 }
 
-void HZMapBili(THCState *state, THCTensor *input_, THCTensor *output_,
-							THCTensor *table_)
+void HZCropBili(THCState *state, THCTensor *input_, THCTensor *output_,
+							int xi, int yi, int xo, int yo)
 /*
  * mapping the image pixels based on the lookuptable
  */
 {
+  /* declarations of the variables */
+	int inw, inh, ow, oh;
+	real sx, sy;
 	/* Check the GPU index */
-	HZPROC_assertSameGPU(state, 3, input_, output_, table_);
+	HZPROC_assertSameGPU(state, 2, input_, output_);
 	/* Device tensors */
 	THCDeviceTensor<real, 3> input  = devicetensor<3>(state, input_);
 	THCDeviceTensor<real, 3> output = devicetensor<3>(state, output_);
-	THCDeviceTensor<real, 3> table  = devicetensor<3>(state, table_);
+	/* scale params */
+	ow = input.getSize(2);
+	oh = input.getSize(1);
+	inw = xo - xi;
+	inh = yo - yi;
+	sx = 1.0 * ow / inw;
+	sy = 1.0 * oh / inh;
 	/* kernel function */
 	cudaStream_t stream = THCState_getCurrentStream(state);
 	dim3 threads(16, 16);
 	dim3 blocks(output.getSize(2)/16+1, output.getSize(1)/16+1, 
 							output.getSize(0));
-	
-	HZMap_Bili_kernel<<<blocks, threads, 0, stream>>>(input, output, table);
+	HZCrop_Bili_kernel<<<blocks, threads, 0, stream>>>(input, output, 
+										xi, yi, sx, sy);
 	THCudaCheck(cudaGetLastError());
 }
+
+__global__ void HZCrop_Pad_kernel (
+	THCDeviceTensor<real, 3> input,
+	THCDeviceTensor<real, 3> output,
+	int xb, int yb, int pad)
+{
+  /* declarations of the variables */
+  int ch, xo, yo, xi, yi, inwidth, inheight;
+  /* Get the index and channels */ 
+  ch = blockIdx.z;
+  xo = blockIdx.x * blockDim.x + threadIdx.x;
+  yo = blockIdx.y * blockDim.y + threadIdx.y;
+	/* boundary check for output */
+	if (xo >= output.getSize(2) || yo >= output.getSize(1))	return;
+	inwidth  = input.getSize(2);
+	inheight = input.getSize(1);
+	/* main operation */
+	xi = xo + xb - pad;
+	yi = yo + xb - pad;
+	/* boundary check for input*/
+	if(xi >= 0 && xi < inwidth && yi >=0 && yi < inheight)
+		output[ch][yo][xo] = input[ch][yi][xi].ldg();
+	else
+		output[ch][yo][xo] = 0;
+}
+
+void HZCropPad(THCState *state, THCTensor *input_, THCTensor *output_,
+							int xi, int yi, int pad)
+/*
+ * mapping the image pixels based on the lookuptable
+ */
+{
+	/* Check the GPU index */
+	HZPROC_assertSameGPU(state, 2, input_, output_);
+	/* Device tensors */
+	THCDeviceTensor<real, 3> input  = devicetensor<3>(state, input_);
+	THCDeviceTensor<real, 3> output = devicetensor<3>(state, output_);
+	/* kernel function */
+	cudaStream_t stream = THCState_getCurrentStream(state);
+	dim3 threads(16, 16);
+	dim3 blocks(output.getSize(2)/16+1, output.getSize(1)/16+1, 
+							output.getSize(0));
+	HZCrop_Pad_kernel<<<blocks, threads, 0, stream>>>(input, output, 
+										xi, yi, pad);
+	THCudaCheck(cudaGetLastError());
+}
+

@@ -13,7 +13,7 @@
  *      derived from this software 
  *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-static int hzproc_(Main_resizetable)(lua_State *L)
+static int hzproc_(Main_table_resize)(lua_State *L)
 /*
  * Generating lookup table to scale the 
  */
@@ -58,7 +58,7 @@ static int hzproc_(Main_resizetable)(lua_State *L)
   return 1;
 }
 
-static int hzproc_(Main_padtable)(lua_State *L)
+static int hzproc_(Main_table_pad)(lua_State *L)
 /*
  * Generating lookup table for padding
  */
@@ -72,11 +72,11 @@ static int hzproc_(Main_padtable)(lua_State *L)
   long out_width  = luaL_checknumber(L, 3);
   long out_height = luaL_checknumber(L, 4);
 	/* continous ptr */
-	long size = 2*out_height*out_width;
+	long chsz = out_height * out_width;
+	long size = 2*chsz;
 	real *tdata = (real*)THAlloc(sizeof(real)*size);
 	/* Creating lookup table */
 	long i, j, oidx, cxin, cyin, cxo, cyo;
-	long chsz = out_height * out_width;
 	cxin = (in_width   - 1) / 2; 
 	cyin = (in_height  - 1) / 2; 
 	cxo  = (out_width  - 1) / 2; 
@@ -104,14 +104,14 @@ static int hzproc_(Main_padtable)(lua_State *L)
   return 1;
 }
 
-static int hzproc_(Main_croptable)(lua_State *L)
+static int hzproc_(Main_table_crop)(lua_State *L)
 /*
  * Generating lookup table for croping
  */
 {
 	/* Check number of inputs */
   if(lua_gettop(L) != 6)
-    luaL_error(L, "HZPROC: GetCropTabel: Incorrect number of arguments.\n");
+    luaL_error(L, "HZPROC: Table.Crop: Incorrect number of arguments.\n");
 	/* Get input variables */
   long in_width 	= luaL_checknumber(L, 1);
   long in_height 	= luaL_checknumber(L, 2);
@@ -120,11 +120,11 @@ static int hzproc_(Main_croptable)(lua_State *L)
   long x_offset   = luaL_checknumber(L, 5);
   long y_offset   = luaL_checknumber(L, 6);
 	/* continous ptr */
-	long size = 2*out_height*out_width;
+	long chsz = out_height * out_width;
+	long size = 2*chsz;
 	real *tdata = (real*)THAlloc(sizeof(real)*size);
 	/* Creating lookup table */
 	long i, j, oidx;
-	long chsz = out_height * out_width;
 	/* centering and recentering */
 	for (j=0; j<out_height; j++) {
 		for(i=0; i<out_width; i++) {
@@ -147,3 +147,44 @@ static int hzproc_(Main_croptable)(lua_State *L)
 	/* C function return number of the outputs */
   return 1;
 }
+
+static int hzproc_(Main_table_flip)(lua_State *L)
+/*
+ * Generating lookup table for horizontal flioping
+ */
+{
+	/* Check number of inputs */
+  if(lua_gettop(L) != 2)
+    luaL_error(L, "HZPROC: Table.Flip: Incorrect number of arguments.\n");
+	/* Get input variables */
+  long width 	= luaL_checknumber(L, 1);
+  long height 	= luaL_checknumber(L, 2);
+	/* continous ptr */
+	long chsz = height*width;
+	long size = 2*chsz;
+	real *tdata = (real*)THAlloc(sizeof(real)*size);
+	/* Creating lookup table */
+	long i, j, oidx;
+	/* centering and recentering */
+	for (j=0; j<height; j++) {
+		for(i=0; i<width; i++) {
+			oidx = j*width + i;
+			*(tdata + oidx)        = (width-1) - i;
+			*(tdata + chsz + oidx) = j;
+		}
+	}
+	/* Create the CudaTensor and copy the data */
+	THCState *state = cutorch_getstate(L);
+	THCTensor *tensor = THCTensor_(newWithSize3d)(state, 2, height, 
+																width);
+	real *ddata = THCTensor_(data)(state, tensor);
+	THCudaCheck(cudaMemcpy(ddata, tdata, size * sizeof(real), 
+							cudaMemcpyHostToDevice));
+	THFree(tdata); 
+	/* return the tensor */
+	lua_pop(L, lua_gettop(L));
+	luaT_pushudata(L, (void*)tensor, THC_Tensor);
+	/* C function return number of the outputs */
+  return 1;
+}
+

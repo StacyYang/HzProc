@@ -27,14 +27,14 @@ Affine.Shift = function (tx, ty)
 	local t = {}
 	t[1] = { 1,  0,  0}
 	t[2] = { 0,  1,  0}
-	t[3] = { tx, ty, 1 }
+	t[3] = { tx, ty, 1}
 	return torch.CudaTensor(t)
 end
 
 Affine.Rotate = function(theta)
 	local t = {}
-	t[1] = {math.cos(theta),-math.sin(theta), 0}
-	t[2] = {math.sin(theta), math.cos(theta), 0}
+	t[1] = { math.cos(theta), math.sin(theta), 0}
+	t[2] = {-math.sin(theta), math.cos(theta), 0}
 	t[3] = {0,               0,               1}
 	return torch.CudaTensor(t)
 end
@@ -45,6 +45,27 @@ Affine.Shear = function (shx, shy)
 	t[2] = { shy, 1,   0}
 	t[3] = { 0,   0,   1}
 	return torch.CudaTensor(t)
+end
+
+Affine.ScaleArround = function(sx, sy, x, y)
+	local t = Affine.Shift(-x, -y) * 
+						Affine.Scale(sx, sy) * 
+						Affine.Shift(x, y)
+	return t
+end
+
+Affine.RotateArround = function(theta, x, y)
+	local t = Affine.Shift(-x, -y) * 
+						Affine.Rotate(theta) * 
+						Affine.Shift(x, y)
+	return t
+end
+
+Affine.ShearArround = function(shx, shy, x, y)
+	local t = Affine.Shift(-x, -y) * 
+						Affine.Shear(shx, shy) * 
+						Affine.Shift(x, y)
+	return t
 end
 
 return Affine

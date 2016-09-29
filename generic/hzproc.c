@@ -18,11 +18,13 @@
 #else
 
 /* load the implementation detail */
-#include "generic/hzlookuptable.c"
+#include "generic/hztable.c"
 #include "generic/hzremap.c"
+#include "generic/hzaffine.c"
 #include "generic/hzcombine.c"
+#include "generic/hzcrop.c"
+#include "generic/hzflip.c"
 
-// TODO support color and lighting jittering
 // TODO support bicubic mapping
 // TODO support radial distortion augmentation
 
@@ -47,12 +49,30 @@ static const struct luaL_Reg hzproc_(Transform) [] =
 
 static const struct luaL_Reg hzproc_(Table) [] = 
 {
-	{"Resize",   hzproc_(Main_resizetable)},
-	{"Pad",      hzproc_(Main_padtable)},
-  {"Crop",     hzproc_(Main_croptable)},
+	{"Resize",   hzproc_(Main_table_resize)},
+	{"Pad",      hzproc_(Main_table_pad)},
+  {"Crop",     hzproc_(Main_table_crop)},
+	{"Flip",     hzproc_(Main_table_flip)},
 	/* end */
 	{NULL, NULL}
 };
+
+static const struct luaL_Reg hzproc_(Crop) [] = 
+{
+	{"Fast",     hzproc_(Main_crop_fast)},
+	{"Bilinear", hzproc_(Main_crop_bili)},
+	{"Pad",      hzproc_(Main_crop_pad)},
+	/* end */
+	{NULL, NULL}
+};
+
+static const struct luaL_Reg hzproc_(Flip) [] = 
+{
+	{"Horizon",     hzproc_(Main_flip_horizon)},
+	/* end */
+	{NULL, NULL}
+};
+
 
 DLL_EXPORT int luaopen_libhzproc(lua_State *L) {
 	lua_newtable(L);
@@ -70,6 +90,15 @@ DLL_EXPORT int luaopen_libhzproc(lua_State *L) {
 	lua_newtable(L);
 	luaT_setfuncs(L, hzproc_(Table), 0);
 	lua_setfield(L, -2, "Table");
+
+	lua_newtable(L);
+	luaT_setfuncs(L, hzproc_(Crop), 0);
+	lua_setfield(L, -2, "Crop");
+
+	lua_newtable(L);
+	luaT_setfuncs(L, hzproc_(Flip), 0);
+	lua_setfield(L, -2, "Flip");
+
 	return 1;
 }
 
