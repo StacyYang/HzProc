@@ -36,7 +36,7 @@ local pca = {
 local function convert()
 	return t.Compose{
 		t.Resize(512,512,256,256),
-    --t.Warp(0.4, 20, 2, 1.25),
+    t.Warp(0.4, 20, 2, 1.25),
     t.RandomCrop(224, 100),
     t.ColorJitter({
     	brightness = 0.4,
