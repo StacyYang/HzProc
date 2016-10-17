@@ -37,7 +37,8 @@ local function convert()
 	return t.Compose{
 		t.Resize(512,512,256,256),
     t.Warp(0.4, 20, 2, 1.25),
-    t.RandomCrop(224, 100),
+    --t.RandomCrop(224, 0),
+    t.RandomSizedCrop(224),
     t.ColorJitter({
     	brightness = 0.4,
     	contrast = 0.4,

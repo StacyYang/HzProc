@@ -29,8 +29,8 @@ __global__ void HZCrop_Fast_kernel (
 	inwidth  = input.getSize(2);
 	inheight = input.getSize(1);
 	/* main operation */
-	xi = xb + sx*xo;
-	yi = yb + sy*yo;
+	xi = xb + xo / sx;
+	yi = yb + yo / sy;
 	/* boundary check for input*/
 	if(xi >= 0 && xi < inwidth && yi >=0 && yi < inheight)
 		output[ch][yo][xo] = input[ch][yi][xi].ldg();
@@ -87,16 +87,15 @@ __global__ void HZCrop_Bili_kernel (
 	inwidth  = input.getSize(2);
 	inheight = input.getSize(1);
 	/* main operation */
-	xi = xb + sx*xo;
-	yi = yb + sy*yo;
+	xi = xb + xo / sx;
+	yi = yb + yo / sy;
 	x0 = (int)xi;
 	y0 = (int)yi;
 	/* boundary check for input*/
 	if(xi >= 0 && xi < inwidth && yi >=0 && yi < inheight)
 	{
-		// TODO FIXME there are bugs in crop bilinear kernel function
-		wx = 0.5;//1.0 - (xi - x0);
-		wy = 0.5;//1.0 - (yi - y0);
+		wx = 1.0 - (xi - x0);
+		wy = 1.0 - (yi - y0);
 		w00 = wx * wy;
 		w01 = (1-wx) * wy;
 		w10 = wx * (1-wy);

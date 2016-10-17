@@ -84,31 +84,29 @@ function M.Resize(inw, inh, ow, oh)
 end
 
 -- Crop to centered rectangle
-function M.CenterCrop(ow, oh)
+function M.CenterCrop(size)
   return function(input)
 		-- avoid unnecessary opterations
 	  local w, h = input:size(3), input:size(2)
-    if (w == ow and h == oh) then
+    if (w == size and h == size) then
       return input
     end	
-		local xoff = (w-ow) / 2
-		local yoff = (h-oh) / 2
+		local xoff = (w-size) / 2
+		local yoff = (h-size) / 2
 		-- mapping 
-		return hzproc.Crop.Fast(input, ow, oh, xoff, yoff, 
-																	xoff + ow, yoff + oh)
+		return hzproc.Crop.Fast(input, size, size, xoff, yoff, 
+																	xoff + size, yoff + size)
   end
 end
 
 -- Random crop form larger image 
 function M.RandomCrop(size, pad)
+	pad = pad or 0
   return function(input)
 		-- avoid unnecessary opterations
     local w, h = input:size(3), input:size(2)
-    if w == size and h == size then
-      return input
-    end
-    local x1, y1 = torch.random(0, w + 2*pad - size), 
-									torch.random(0, h + 2*pad - size)
+    local x1, y1 = torch.random(0, w + 2*pad - size - 1), 
+									torch.random(0, h + 2*pad - size -1)
     local out = hzproc.Crop.Pad(input, x1, y1, size, size, pad)
     assert(out:size(2) == size and out:size(3) == size, 'wrong crop size')
     return out
@@ -145,17 +143,18 @@ end
 -- Random crop with size 8%-100% and aspect ratio 3/4 - 4/3 
 -- (Inception-style)
 function M.RandomSizedCrop(size)
-  local crop = M.RandomCrop(size, size)
+  local crop = M.RandomCrop(size)
   return function(input)
     local attempt = 0
     repeat
+			-- random area
       local area = input:size(2) * input:size(3)
-      local targetArea = torch.uniform(0.08, 1.0) * area
-
-      local aspectRatio = torch.uniform(3/4, 4/3)
+      local targetArea = torch.uniform(0.09, 1.0) * area
+			-- aspect ratio
+      local aspectRatio = torch.uniform(3/4, 4/3) 
       local w = torch.round(math.sqrt(targetArea * aspectRatio))
       local h = torch.round(math.sqrt(targetArea / aspectRatio))
-
+			-- change w & h
       if torch.uniform() < 0.5 then
         w, h = h, w
       end
@@ -163,8 +162,7 @@ function M.RandomSizedCrop(size)
       if h <= input:size(2) and w <= input:size(3) then
         local y1 = torch.random(0, input:size(2) - h)
         local x1 = torch.random(0, input:size(3) - w)
-
-        return hzproc.Crop.Fast(input, size, size,
+        return hzproc.Crop.Bilinear(input, size, size,
 															x1, y1, x1 + w, y1 + h)
       end
       attempt = attempt + 1
