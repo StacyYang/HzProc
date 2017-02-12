@@ -2,7 +2,7 @@ package = "hzproc"
 version = "scm-1"
 
 source = {
-		url = "git@github.com:zhanghang1989/hzproc.git",
+		url = "git://github.com/zhanghang1989/hzproc.git",
 		tag = "master"
 }
 
