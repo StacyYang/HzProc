@@ -41,8 +41,14 @@ backend.
 This package relies on [torch7](https://github.com/torch/torch7) and 
 [cutorch](https://github.com/torch/cutorch). Please note the package
 also relies on a NVIDIA GPU compitable with CUDA 6.5 or higher version.
+
+On Linux
 ```bash
 luarocks install https://raw.githubusercontent.com/zhanghang1989/hzproc/master/hzproc-scm-1.rockspec
+```
+On OSX
+```bash
+CC=clang CXX=clang++ luarocks install https://raw.githubusercontent.com/zhanghang1989/hzproc/master/hzproc-scm-1.rockspec
 ```
 
 ## Quick Demo
